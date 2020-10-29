@@ -1,26 +1,44 @@
-FROM node:12.18.0
+FROM node:alpine
 
-RUN  apt-get update \
-     && apt-get install -y wget gnupg ca-certificates \
-     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-     && apt-get update \
-     # We install Chrome to get all the OS level dependencies, but Chrome itself
-     # is not actually used as it's packaged in the node puppeteer library.
-     # Alternatively, we could could include the entire dep list ourselves
-     # (https://github.com/puppeteer/puppeteer/blob/master/docs/troubleshooting.md#chrome-headless-doesnt-launch-on-unix)
-     # but that seems too easy to get out of date.
-     && apt-get install -y google-chrome-stable \
-     && rm -rf /var/lib/apt/lists/* \
-     && wget --quiet https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh -O /usr/sbin/wait-for-it.sh \
-     && chmod +x /usr/sbin/wait-for-it.sh
+ARG BUILD_DATE
+ARG VCS_REF
 
-# Install Puppeteer under /node_modules so it's available system-wide
-WORKDIR /scraper
+# Installs latest Chromium package.
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" > /etc/apk/repositories \
+    && echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+    && echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
+    && echo "http://dl-cdn.alpinelinux.org/alpine/v3.12/main" >> /etc/apk/repositories \
+    && apk upgrade -U -a \
+    && apk add \
+    libstdc++ \
+    chromium \
+    harfbuzz \
+    nss \
+    freetype \
+    ttf-freefont \
+    font-noto-emoji \
+    wqy-zenhei \
+    && rm -rf /var/cache/* \
+    && mkdir /var/cache/apk
+
+# Add Chrome as a user
+#RUN mkdir -p /usr/apps/scraper \ && adduser -D chrome \ && chown -R chrome:chrome /usr/apps/scraper
+# Run Chrome as non-privileged
+
+#USER chrome
+#ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+
+#ENV CHROMIUM_PATH /usr/bin/chromium-browser
+
+WORKDIR /usr/apps/scraper
+
+ENV CHROME_BIN=/usr/bin/chromium-browser \
+    CHROME_PATH=/usr/lib/chromium/
+
 COPY ./package.json ./
+
 RUN npm install
-#RUN apk update && apk upgrade && \
-  #  apk add --no-cache bash git openssh
+
 COPY ./ ./
 
 CMD ["npm", "start"]

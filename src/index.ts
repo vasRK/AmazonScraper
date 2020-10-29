@@ -7,6 +7,7 @@ const isbns = ["https://www.amazon.in/gp/offer-listing/110849224X/condition=all"
 console.time("asyncGet");
 async function getBrowser() {
     const browser = await puppeteer.launch({
+        executablePath: process.env.CHROME_BIN,
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox'
