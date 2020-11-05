@@ -104,3 +104,4 @@ dist
 .tern-port
 src/nn.js
 lib/index.js.map
+lib/index.js.map

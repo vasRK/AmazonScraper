@@ -55,9 +55,8 @@ async function runScrape() {
     });
 }
 
-
 function streamToFile(streamData: Buffer) {
-    var stream = fs.createWriteStream('bookcover', { flags: 'a' });
+    var stream = fs.createWriteStream('bookcover');
     stream.write(streamData, function () {
         // Now the data has been written.
     });
