@@ -1,8 +1,7 @@
-//const puppeteer = require('puppeteer');
-// import { axios} from 'axios';
-import cheerio from 'cheerio';
-import puppeteer from 'puppeteer'
-const isbns = ["https://www.amazon.in/gp/offer-listing/110849224X/condition=all", "https://www.amazon.in/gp/offer-listing/0345816021"];
+
+import puppeteer from 'puppeteer';
+import fs from 'fs';
+const isbns = ["https://pictures.abebooks.com/isbn/9780553386691-us-300.jpg"];
 
 console.time("asyncGet");
 async function getBrowser() {
@@ -13,6 +12,7 @@ async function getBrowser() {
             '--disable-setuid-sandbox'
         ]
     });
+
     return browser;
 }
 
@@ -22,7 +22,7 @@ async function getPage(browser: puppeteer.Browser) {
     await page.setRequestInterception(true);
 
     page.on('request', (req) => {
-        if (req.resourceType() == 'stylesheet' || req.resourceType() == 'font' || req.resourceType() == 'image') {
+        if (req.resourceType() == 'stylesheet' || req.resourceType() == 'font') {
             req.abort();
         }
         else {
@@ -32,30 +32,34 @@ async function getPage(browser: puppeteer.Browser) {
 
     return page;
 }
-async function getBook(browser: puppeteer.Browser, isbn: string) {
-    const page = await getPage(browser);
-    await page.goto(isbn);
-    console.time("contentLoad" + isbn);
-    await page.waitForSelector("div.olpOffer");
-    const html = await page.evaluate(() => document.body.innerHTML);
-    cheerio("div.olpOffer", html).each((index, ele) => {
-        const price = cheerio(ele).find("div.olpPriceColumn span span").first().text().trim();
-        const conditon = cheerio(ele).find("span.olpCondition").text().trim();
-        const seller = cheerio(ele).find(".olpSellerName a").text().trim();
-        console.log("" + index + ". " + "Price: " + price + " Condition: " + conditon + " Seller: " + seller);
-    });
-    console.timeEnd("contentLoad" + isbn);
 
+async function getBookImages(browser: puppeteer.Browser, url: string) {
+    const page = await getPage(browser);
+    const [response] = await Promise.all([
+        page.waitForResponse(response => response.url().includes('.jpg')),
+        page.goto(url)
+    ]);
+
+    const buffer = await response.buffer();
+    streamToFile(buffer);
     page.close();
 }
 
 async function runScrape() {
     const browser = await getBrowser();
-    let prms = isbns.map(_isbn => getBook(browser, _isbn));
+    let prms = isbns.map(_isbn => getBookImages(browser, _isbn));
     Promise.all(prms).then(async () => {
         await browser.close();
         console.log("done");
         console.timeEnd("asyncGet");
+    });
+}
+
+
+function streamToFile(streamData: Buffer) {
+    var stream = fs.createWriteStream('bookcover', { flags: 'a' });
+    stream.write(streamData, function () {
+        // Now the data has been written.
     });
 }
 
