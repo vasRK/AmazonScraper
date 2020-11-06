@@ -105,3 +105,5 @@ dist
 src/nn.js
 lib/index.js.map
 lib/index.js.map
+lib/BlogClientUtil.js.map
+bookcover

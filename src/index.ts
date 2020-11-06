@@ -1,8 +1,9 @@
 
 import puppeteer from 'puppeteer';
 import fs from 'fs';
-const isbns = ["https://pictures.abebooks.com/isbn/9780553386691-us-300.jpg"];
+import { BlogClientUtil } from './BlogClientUtil';
 
+const isbns = ["https://pictures.abebooks.com/isbn/9780553386691-us-300.jpg"];
 console.time("asyncGet");
 async function getBrowser() {
     const browser = await puppeteer.launch({
@@ -41,7 +42,12 @@ async function getBookImages(browser: puppeteer.Browser, url: string) {
     ]);
 
     const buffer = await response.buffer();
-    streamToFile(buffer);
+    const containerClient = await BlogClientUtil.GetClient();
+    const blockBlobClient = containerClient.getBlockBlobClient( "9780553386691");
+    blockBlobClient.
+    const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length);
+    console.log(uploadBlobResponse);
+    //streamToFile(buffer);
     page.close();
 }
 
