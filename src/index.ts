@@ -1,71 +1,46 @@
-
 import puppeteer from 'puppeteer';
 import fs from 'fs';
-import { BlogClientUtil } from './BlogClientUtil';
+import { BlogClientUtil } from './blob-client-utils';
+import { ServiceBusClient, ReceiveMode, ServiceBusMessage } from "@azure/service-bus";
+import { BookInfo } from './book-info';
+import { BrowserUtils } from './browser-utils';
 
 const isbns = ["https://pictures.abebooks.com/isbn/9780553386691-us-300.jpg"];
 console.time("asyncGet");
-async function getBrowser() {
-    const browser = await puppeteer.launch({
-        executablePath: process.env.CHROME_BIN,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox'
-        ]
-    });
 
-    return browser;
-}
+const conStr = process.env.AZURE_SERVICEBUS_CONNECTION_STRING;
+const qName = "testq";
 
-async function getPage(browser: puppeteer.Browser) {
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1920, height: 1080 });
-    await page.setRequestInterception(true);
+async function main() {
+    const sbClient = ServiceBusClient.createFromConnectionString(conStr);
+    const queueClient = sbClient.createQueueClient(qName);
+    const receiver = queueClient.createReceiver(ReceiveMode.peekLock);
+    const browserUtils = new BrowserUtils();
 
-    page.on('request', (req) => {
-        if (req.resourceType() == 'stylesheet' || req.resourceType() == 'font') {
-            req.abort();
+    const msgHandler = async (message: ServiceBusMessage) => {
+        const book: BookInfo = <any>{ ...message.userProperties };
+        await browserUtils.getBookImages(book.isbn13);
+        console.log('image extracted', book.isbn13);
+        await message.complete();
+    };
+
+    const onErrorHandler = (err: any) => {
+        console.log("Error occurred: ", err);
+    };
+
+    try {
+        while (true) {
+            const messages = await receiver.receiveMessages(1);
+            messages.forEach(msgHandler);
         }
-        else {
-            req.continue();
-        }
-    });
-
-    return page;
+    } catch (err) {
+        console.log('error on while read', err);
+    }
+    finally {
+        await sbClient.close();
+    }
 }
 
-async function getBookImages(browser: puppeteer.Browser, url: string) {
-    const page = await getPage(browser);
-    const [response] = await Promise.all([
-        page.waitForResponse(response => response.url().includes('.jpg')),
-        page.goto(url)
-    ]);
-
-    const buffer = await response.buffer();
-    const containerClient = await BlogClientUtil.GetClient();
-    const blockBlobClient = containerClient.getBlockBlobClient( "9780553386691");
-    blockBlobClient.
-    const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length);
-    console.log(uploadBlobResponse);
-    //streamToFile(buffer);
-    page.close();
-}
-
-async function runScrape() {
-    const browser = await getBrowser();
-    let prms = isbns.map(_isbn => getBookImages(browser, _isbn));
-    Promise.all(prms).then(async () => {
-        await browser.close();
-        console.log("done");
-        console.timeEnd("asyncGet");
-    });
-}
-
-function streamToFile(streamData: Buffer) {
-    var stream = fs.createWriteStream('bookcover');
-    stream.write(streamData, function () {
-        // Now the data has been written.
-    });
-}
-
-runScrape();
+main().catch((err) => {
+    console.log("Error occurred: ", err);
+});
