@@ -3,9 +3,12 @@ import { BlogClientUtil } from './blob-client-utils';
 
 export class BrowserUtils {
     browser: puppeteer.Browser;
+    constructor() {
+        this.getBrowser();
+    }
     getBrowser = async function () {
         if (!this.browser) {
-            const browser = await puppeteer.launch({
+            this.browser = await puppeteer.launch({
                 executablePath: process.env.CHROME_BIN,
                 args: [
                     '--no-sandbox',
@@ -34,7 +37,7 @@ export class BrowserUtils {
         return page;
     }
 
-    getBookImages = async function (url: string) {
+    getBookImages = async function (url: string, bookId: number) {
         const page = await this.getPage();
         const [response] = await Promise.all([
             page.waitForResponse(response => response.url().includes('.jpg')),
@@ -43,9 +46,10 @@ export class BrowserUtils {
 
         const buffer = await response.buffer();
         const containerClient = await BlogClientUtil.GetClient();
-        const blockBlobClient = containerClient.getBlockBlobClient("9780553386691");
+        const blockBlobClient = containerClient.getBlockBlobClient(url + "-" + bookId);
         const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length);
         console.log(uploadBlobResponse);
         page.close();
+        console.log('fetch image end', url);
     }
 }

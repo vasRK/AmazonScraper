@@ -33,7 +33,7 @@ export class BlogClientUtil {
         // will be used as a fallback authentication source.
         const defaultAzureCredential = new DefaultAzureCredential();
         const blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net`, defaultAzureCredential);
-        const response = await blobServiceClient.createContainer("banana");
-        return response.containerClient;
+        const containerClient = await blobServiceClient.getContainerClient("banana");
+        return containerClient;
     }
 }

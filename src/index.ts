@@ -1,12 +1,6 @@
-import puppeteer from 'puppeteer';
-import fs from 'fs';
-import { BlogClientUtil } from './blob-client-utils';
 import { ServiceBusClient, ReceiveMode, ServiceBusMessage } from "@azure/service-bus";
 import { BookInfo } from './book-info';
 import { BrowserUtils } from './browser-utils';
-
-const isbns = ["https://pictures.abebooks.com/isbn/9780553386691-us-300.jpg"];
-console.time("asyncGet");
 
 const conStr = process.env.AZURE_SERVICEBUS_CONNECTION_STRING;
 const qName = "testq";
@@ -19,7 +13,7 @@ async function main() {
 
     const msgHandler = async (message: ServiceBusMessage) => {
         const book: BookInfo = <any>{ ...message.userProperties };
-        await browserUtils.getBookImages(book.isbn13);
+        await browserUtils.getBookImages(book.isbn13, book.bookId);
         console.log('image extracted', book.isbn13);
         await message.complete();
     };
