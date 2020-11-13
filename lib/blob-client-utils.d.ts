@@ -1,3 +1,3 @@
-export declare class BlogClientUtil {
+export declare class BlobClientUtil {
     static GetClient(): Promise<import("@azure/storage-blob").ContainerClient>;
 }

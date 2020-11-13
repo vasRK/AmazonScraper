@@ -3,7 +3,7 @@ require("dotenv").config();
 import { DefaultAzureCredential } from '@azure/identity';
 import { BlobServiceClient } from '@azure/storage-blob';
 
-export class BlogClientUtil {
+export class BlobClientUtil {
     static async GetClient() {
         // Enter your storage account name
         const account = process.env.AZURE_ACCOUNT_NAME || "";

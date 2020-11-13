@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer';
-import { BlogClientUtil } from './blob-client-utils';
+import { BlobClientUtil } from './blob-client-utils';
 
 export class BrowserUtils {
     browser: puppeteer.Browser;
@@ -45,11 +45,11 @@ export class BrowserUtils {
         ]);
 
         const buffer = await response.buffer();
-        const containerClient = await BlogClientUtil.GetClient();
-        const blockBlobClient = containerClient.getBlockBlobClient(url + "-" + bookId);
+        const containerClient = await BlobClientUtil.GetClient();
+        const blockBlobClient = containerClient.getBlockBlobClient(url);
         const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length);
-        console.log(uploadBlobResponse);
+        //console.log(uploadBlobResponse);
         page.close();
-        console.log('fetch image end', url);
+        //console.log('fetch image end', url);
     }
 }
