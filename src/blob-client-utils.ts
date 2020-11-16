@@ -36,4 +36,10 @@ export class BlobClientUtil {
         const containerClient = await blobServiceClient.getContainerClient("banana");
         return containerClient;
     }
+
+    static async UploadBlob(fileName: string, buffer: Buffer) {
+        const containerClient = await BlobClientUtil.GetClient();
+        const blockBlobClient = containerClient.getBlockBlobClient(fileName);
+        return await blockBlobClient.upload(buffer, buffer.length);
+    }
 }

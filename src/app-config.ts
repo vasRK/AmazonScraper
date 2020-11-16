@@ -15,10 +15,14 @@ const { AZURE_SERVICEBUS_CONNECTION_STRING,
     AZURE_ACCOUNT_NAME,
     AZURE_CLIENT_SECRET,
     AZURE_TENANT_ID,
-    AZURE_CLIENT_ID
+    AZURE_CLIENT_ID,
+    SCRAPE_API_KEY,
+    IMAGE_URL_FMT
 } = process.env;
 
 // validate the required configuration information
+assert(IMAGE_URL_FMT, "Image url fmt configuration is required.");
+assert(SCRAPE_API_KEY, "Scrape api key configuration is required.");
 assert(AZURE_CLIENT_ID, "Client id configuration is required.");
 assert(AZURE_TENANT_ID, "Tenant id configuration is required.");
 assert(AZURE_CLIENT_SECRET, "Client name configuration is required.");
@@ -43,4 +47,6 @@ export {
     , AZURE_CLIENT_SECRET
     , AZURE_TENANT_ID
     , AZURE_CLIENT_ID
+    , SCRAPE_API_KEY
+    , IMAGE_URL_FMT
 }

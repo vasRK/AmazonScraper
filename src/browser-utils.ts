@@ -1,12 +1,14 @@
 import puppeteer from 'puppeteer';
+import { SCRAPE_API_KEY } from './app-config';
 import { BlobClientUtil } from './blob-client-utils';
 
-export class BrowserUtils {
+export class ImageScraper {
     browser: puppeteer.Browser;
     constructor() {
         this.getBrowser();
     }
-    getBrowser = async function () {
+
+    async getBrowser() {
         if (!this.browser) {
             this.browser = await puppeteer.launch({
                 executablePath: process.env.CHROME_BIN,
@@ -20,9 +22,9 @@ export class BrowserUtils {
         return this.browser;
     }
 
-    getPage = async function () {
+    async getPage() {
         const page = await this.browser.newPage();
-        await page.setViewport({ width: 1920, height: 1080 });
+        await page.setViewport({ width: 1368, height: 720 });
         await page.setRequestInterception(true);
 
         page.on('request', (req) => {
@@ -37,19 +39,32 @@ export class BrowserUtils {
         return page;
     }
 
-    getBookImages = async function (url: string, bookId: number) {
+    async getBookImages(isbn: string) {
+        const buffer = await this.getBookImageBuffer(isbn);
+        let status = false;
+        if (buffer.byteLength > 0) {
+            const uploadRes = await BlobClientUtil.UploadBlob(isbn, buffer);
+            if (uploadRes._response.status == 200) {
+                status = true;
+            }
+        }
+
+        return { success: status };
+    }
+
+    async getBookImageBuffer(isbn: string) {
         const page = await this.getPage();
         const [response] = await Promise.all([
             page.waitForResponse(response => response.url().includes('.jpg')),
-            page.goto(`https://pictures.abebooks.com/isbn/${url}-us-300.jpg`)
+            page.goto(this.MakeURL(isbn))
         ]);
 
         const buffer = await response.buffer();
-        const containerClient = await BlobClientUtil.GetClient();
-        const blockBlobClient = containerClient.getBlockBlobClient(url);
-        const uploadBlobResponse = await blockBlobClient.upload(buffer, buffer.length);
-        //console.log(uploadBlobResponse);
         page.close();
-        //console.log('fetch image end', url);
+        return buffer;
+    }
+
+    MakeURL(isbn: string) {
+        return `https://api.scraperapi.com/?key=${SCRAPE_API_KEY}&url=https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg`;
     }
 }
