@@ -44,7 +44,7 @@ export class ImageScraper {
         let status = false;
         if (buffer.byteLength > 0) {
             const uploadRes = await BlobClientUtil.UploadBlob(isbn, buffer);
-            if (uploadRes._response.status == 200) {
+            if (uploadRes._response.status == 201) {
                 status = true;
             }
         }
@@ -54,9 +54,10 @@ export class ImageScraper {
 
     async getBookImageBuffer(isbn: string) {
         const page = await this.getPage();
+        const url = this.MakeURL(isbn);
         const [response] = await Promise.all([
             page.waitForResponse(response => response.url().includes('.jpg')),
-            page.goto(this.MakeURL(isbn))
+            page.goto(url)
         ]);
 
         const buffer = await response.buffer();
@@ -65,6 +66,7 @@ export class ImageScraper {
     }
 
     MakeURL(isbn: string) {
-        return `https://api.scraperapi.com/?key=${SCRAPE_API_KEY}&url=https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg`;
+        //return `https://api.scraperapi.com/?key=${SCRAPE_API_KEY}&url=https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg`;
+        return `https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg`;
     }
 }

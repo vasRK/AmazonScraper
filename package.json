@@ -28,6 +28,7 @@
     "@azure/service-bus": "^1.1.10",
     "@azure/storage-blob": "^12.2.1",
     "dotenv": "^8.2.0",
+    "log4js": "^6.3.0",
     "mssql": "^6.2.3",
     "puppeteer": "^5.4.1"
   }
