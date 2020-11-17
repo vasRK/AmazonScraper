@@ -1,2 +1,2 @@
 declare const logger: import("log4js").Logger;
-export { logger };
+export { logger as _logger };

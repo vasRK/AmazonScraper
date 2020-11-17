@@ -1,7 +1,8 @@
 
 require("dotenv").config();
-import { DefaultAzureCredential } from '@azure/identity';
+
 import { BlobServiceClient } from '@azure/storage-blob';
+import { DefaultAzureCredential } from '@azure/identity';
 
 export class BlobClientUtil {
     static async GetClient() {
@@ -33,7 +34,7 @@ export class BlobClientUtil {
         // will be used as a fallback authentication source.
         const defaultAzureCredential = new DefaultAzureCredential();
         const blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net`, defaultAzureCredential);
-        const containerClient = await blobServiceClient.getContainerClient("banana");
+        const containerClient = await blobServiceClient.getContainerClient("banana-prod");
         return containerClient;
     }
 

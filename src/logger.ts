@@ -13,4 +13,4 @@ configure({
 
 });
 
-export { logger };
+export { logger as _logger };
