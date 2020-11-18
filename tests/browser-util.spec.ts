@@ -1,7 +1,6 @@
-import { expect } from "chai";
-import { ImageScraper } from '../src/browser-utils';
 import { Browser } from 'puppeteer';
-
+import { ImageScraper } from '../src/browser-utils';
+import { expect } from "chai";
 
 describe('browser-util', () => {
 

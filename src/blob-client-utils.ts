@@ -34,7 +34,7 @@ export class BlobClientUtil {
         // will be used as a fallback authentication source.
         const defaultAzureCredential = new DefaultAzureCredential();
         const blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net`, defaultAzureCredential);
-        const containerClient = await blobServiceClient.getContainerClient("banana-prod");
+        const containerClient = await blobServiceClient.getContainerClient("prod-new");
         return containerClient;
     }
 
