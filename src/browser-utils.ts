@@ -45,10 +45,14 @@ export class ImageScraper {
     async getBookImages(isbn: string) {
         const buffer = await this.getBookImageBuffer(isbn);
         let status = false;
-        if (buffer && buffer.byteLength > 0) {
+        if (buffer && buffer.byteLength > 1000) { // assuming image size of min 10-20Kb
             const uploadRes = await BlobClientUtil.UploadBlob(isbn, buffer);
             if (uploadRes._response.status == 201) {
                 status = true;
+            }
+        } else {
+            if (buffer && buffer.length > 0) {
+                _logger.trace("extract failed - ", buffer.toString('utf8'))
             }
         }
 
@@ -73,7 +77,7 @@ export class ImageScraper {
     }
 
     MakeURL(isbn: string) {
-        return `https://api.scraperapi.com/?key=${SCRAPE_API_KEY}&url=https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg?render=true`;
-       // return `https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg`;
+       // return `https://api.scraperapi.com/?key=${SCRAPE_API_KEY}&url=https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg?render=true`;
+         return `https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg`;
     }
 }

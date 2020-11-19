@@ -21,7 +21,7 @@ async function main() {
         const conn = await repository.GetConnection();
         while (true) {
             _logger.info('batch start');
-            const messages = await receiver.receiveMessages(30);
+            const messages = await receiver.receiveMessages(13);
             const extractResponses = await Promise.all(messages.map(msgHandler));
             const completeBookIds = extractResponses.filter(res => res.success).map(res => res.bookId);
             if (completeBookIds.length > 0) {
