@@ -7,7 +7,17 @@ import { DefaultAzureCredential } from '@azure/identity';
 import { _logger } from './logger';
 
 export class BlobClientUtil {
+    container: ContainerClient;
+    constructor() {
+        this.container = this.GetClient();
+    }
+
     GetClient() {
+
+        if (this.container) {
+            return this.container;
+        }
+
         // Enter your storage account name
         const account = process.env.AZURE_ACCOUNT_NAME || "";
 
@@ -34,17 +44,20 @@ export class BlobClientUtil {
         // If those environment variables aren't found and your application is deployed
         // to an Azure VM or App Service instance, the managed service identity endpoint
         // will be used as a fallback authentication source.
+
         const defaultAzureCredential = new DefaultAzureCredential();
         const blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net`, defaultAzureCredential);
-        let containerClient: ContainerClient;
+
         try {
-            containerClient = blobServiceClient.getContainerClient("banana-prod");
+            this.container = blobServiceClient.getContainerClient("banana-prod");
+            _logger.info('container client created');
+            console.log('container client created');
         }
         catch (err) {
             _logger.trace('blob client err - ', err)
         }
 
-        return containerClient;
+        return this.container;
     }
 
     async UploadBlob(fileName: string, buffer: Buffer) {
