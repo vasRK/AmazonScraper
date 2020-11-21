@@ -20,12 +20,14 @@ async function main() {
             const extractResponses = await Promise.all(messages.map(msgHandler));
             const completeBookIds = extractResponses.filter(res => res.success).map(res => res.bookId);
             if (completeBookIds.length > 0) {
-                const query = `UPDATE [dbo].[BookInformation] SET IsImageDownloaded = 'True' WHERE Id IN(${completeBookIds.map(msgId => "\'" + msgId + "\'").join(",")})`;
+                const query = `UPDATE [dbo].[BookInformation] SET IsImageDownloaded = 'True', ImageDownloadState = 4 WHERE Id IN(${completeBookIds.map(bookId => "\'" + bookId + "\'").join(",")})`;
                 await conn.request().query(query);
             }
 
             const failedBookIds = extractResponses.filter(res => !res.success).map(res => res.bookId);
             if (failedBookIds.length > 0) {
+                const query = `UPDATE [dbo].[BookInformation] SET ImageDownloadState = 3 WHERE Id IN(${failedBookIds.map(bookId => "\'" + bookId + "\'").join(",")})`;
+                await conn.request().query(query);
                 _logger.error(`image extraction failed for book ids ${failedBookIds.join()}`)
             }
 
