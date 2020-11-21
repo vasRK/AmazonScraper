@@ -1,11 +1,13 @@
 
 require("dotenv").config();
 
-import { BlobServiceClient } from '@azure/storage-blob';
+import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
+
 import { DefaultAzureCredential } from '@azure/identity';
+import { _logger } from './logger';
 
 export class BlobClientUtil {
-    static async GetClient() {
+    GetClient() {
         // Enter your storage account name
         const account = process.env.AZURE_ACCOUNT_NAME || "";
 
@@ -34,12 +36,19 @@ export class BlobClientUtil {
         // will be used as a fallback authentication source.
         const defaultAzureCredential = new DefaultAzureCredential();
         const blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net`, defaultAzureCredential);
-        const containerClient = await blobServiceClient.getContainerClient("prod-new");
+        let containerClient: ContainerClient;
+        try {
+            containerClient = blobServiceClient.getContainerClient("banana-prod");
+        }
+        catch (err) {
+            _logger.trace('blob client err - ', err)
+        }
+
         return containerClient;
     }
 
-    static async UploadBlob(fileName: string, buffer: Buffer) {
-        const containerClient = await BlobClientUtil.GetClient();
+    async UploadBlob(fileName: string, buffer: Buffer) {
+        const containerClient = this.GetClient();
         const blockBlobClient = containerClient.getBlockBlobClient(fileName);
         return await blockBlobClient.upload(buffer, buffer.length);
     }

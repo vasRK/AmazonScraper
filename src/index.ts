@@ -4,24 +4,19 @@ import { BookInfo } from './book-info';
 import { ImageScraper } from './browser-utils';
 import { Repository } from "./repository";
 import { _logger } from './logger'
+
+const scraper = new ImageScraper();
 async function main() {
     const sbClient = ServiceBusClient.createFromConnectionString(AZURE_SERVICEBUS_CONNECTION_STRING);
     const queueClient = sbClient.createQueueClient(AZURE_SERVICEBUS_QUEUE);
     const receiver = queueClient.createReceiver(ReceiveMode.peekLock);
-    const scraper = new ImageScraper();
     const repository = new Repository();
-
-    const msgHandler = async (message: ServiceBusMessage) => {
-        const book: BookInfo = <any>{ ...message.userProperties };
-        const response = await scraper.getBookImages(book.isbn13);
-        return { ...response, bookId: book.bookId };
-    };
 
     try {
         const conn = await repository.GetConnection();
         while (true) {
             _logger.info('batch start');
-            const messages = await receiver.receiveMessages(13);
+            const messages = await receiver.receiveMessages(30);
             const extractResponses = await Promise.all(messages.map(msgHandler));
             const completeBookIds = extractResponses.filter(res => res.success).map(res => res.bookId);
             if (completeBookIds.length > 0) {
@@ -37,6 +32,7 @@ async function main() {
             const msgCompleteReq = messages.map(msg => msg.complete());
             const res = await Promise.all([...msgCompleteReq]);
             _logger.info('batch end total messages ', messages.length);
+            console.log(`${new Date()} batch end total messages `, messages.length);
             // throw new exception("user exp");
         }
     } catch (err) {
@@ -49,6 +45,13 @@ async function main() {
 
     process.exit(0);
 }
+
+const msgHandler = async (message: ServiceBusMessage) => {
+    const book: BookInfo = <any>{ ...message.userProperties };
+    //_logger.info('fetch start: ', book.isbn13);
+    const response = await scraper.getBookImages(book.isbn13);
+    return { ...response, bookId: book.bookId };
+};
 
 main().catch((err) => {
     console.log("Error occurred: ", err);

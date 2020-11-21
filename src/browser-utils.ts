@@ -1,14 +1,15 @@
 import { BlobClientUtil } from './blob-client-utils';
-import { SCRAPE_API_KEY } from './app-config';
 import { _logger } from './logger'
-import { logger } from '@azure/identity';
 import puppeteer from 'puppeteer';
 import { handle } from './error-handler';
+import { BlobClient } from '@azure/storage-blob';
 
 export class ImageScraper {
     browser: puppeteer.Browser;
+    blobClient: BlobClientUtil;
     constructor() {
         this.getBrowser();
+        this.blobClient = new BlobClientUtil();
     }
 
     async getBrowser() {
@@ -45,8 +46,8 @@ export class ImageScraper {
     async getBookImages(isbn: string) {
         const buffer = await this.getBookImageBuffer(isbn);
         let status = false;
-        if (buffer && buffer.byteLength > 1000) { // assuming image size of min 10-20Kb
-            const uploadRes = await BlobClientUtil.UploadBlob(isbn, buffer);
+        if (buffer && buffer.byteLength > 10000) { // assuming image size of min 10-20Kb
+            const uploadRes = await this.blobClient.UploadBlob(isbn, buffer);
             if (uploadRes._response.status == 201) {
                 status = true;
             }
@@ -77,7 +78,7 @@ export class ImageScraper {
     }
 
     MakeURL(isbn: string) {
-       // return `https://api.scraperapi.com/?key=${SCRAPE_API_KEY}&url=https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg?render=true`;
-         return `https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg`;
+        // return `https://api.scraperapi.com/?key=${SCRAPE_API_KEY}&url=https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg?render=true`;
+        return `https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg`;
     }
 }

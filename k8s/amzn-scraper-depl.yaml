@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+    name: amzn-scraper-depl
+spec:
+    replicas: 3
+    selector: 
+        matchLabels:
+            app: amzn-scraper
+    template: 
+        metadata: 
+            labels:
+                app: amzn-scraper
+        spec: 
+            containers:
+                - name: amzn-scraper
+                  image: srinivasr553/amzn-scraper:latest
+                  imagePullPolicy: Always
+            imagePullSecrets:
+                - name: regcred

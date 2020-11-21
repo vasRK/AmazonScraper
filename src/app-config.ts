@@ -21,7 +21,7 @@ const { AZURE_SERVICEBUS_CONNECTION_STRING,
 } = process.env;
 
 // validate the required configuration information
-assert(IMAGE_URL_FMT, "Image url fmt configuration is required.");
+//assert(IMAGE_URL_FMT, "Image url fmt configuration is required.");
 assert(SCRAPE_API_KEY, "Scrape api key configuration is required.");
 assert(AZURE_CLIENT_ID, "Client id configuration is required.");
 assert(AZURE_TENANT_ID, "Tenant id configuration is required.");

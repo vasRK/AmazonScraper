@@ -1,5 +1,6 @@
 /// <reference types="node" />
+import { ContainerClient } from '@azure/storage-blob';
 export declare class BlobClientUtil {
-    static GetClient(): Promise<import("@azure/storage-blob").ContainerClient>;
-    static UploadBlob(fileName: string, buffer: Buffer): Promise<import("@azure/storage-blob").BlockBlobUploadResponse>;
+    GetClient(): ContainerClient;
+    UploadBlob(fileName: string, buffer: Buffer): Promise<import("@azure/storage-blob").BlockBlobUploadResponse>;
 }
