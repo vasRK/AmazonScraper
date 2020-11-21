@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+    name: amzn-scraper-depl
+spec:
+    replicas: 4
+    selector: 
+        matchLabels:
+            app: amzn-scraper
+    template: 
+        metadata: 
+            labels:
+                app: amzn-scraper
+        spec: 
+            containers:
+                - name: amzn-scraper
+                  image: bdbbooksacr.azurecr.io/amzn-scraper:v1
+
