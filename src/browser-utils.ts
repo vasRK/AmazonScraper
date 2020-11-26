@@ -2,7 +2,6 @@ import { BlobClientUtil } from './blob-client-utils';
 import { _logger } from './logger'
 import puppeteer from 'puppeteer';
 import { handle } from './error-handler';
-import { BlobClient } from '@azure/storage-blob';
 
 export class ImageScraper {
     browser: puppeteer.Browser;
