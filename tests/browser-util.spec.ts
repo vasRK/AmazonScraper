@@ -25,14 +25,14 @@ describe('browser-util', () => {
     it('if load page with image buffer should be valid', async function () {
         this.timeout(0);
         await browserUtil.getBrowser();
-        const buffer = await browserUtil.getBookImageBuffer("9780007494682");
+        const buffer = await browserUtil.getBookImageBuffer("9780801034336");
         expect(buffer.byteLength).greaterThan(0);
     });
 
     it.only('if incorrect page buffer should be empty', async function () {
         this.timeout(0);
         await browserUtil.getBrowser();
-        const buffer = await browserUtil.getBookImageBuffer("978000749468222");
+        const buffer = await browserUtil.getBookImageBuffer("9780801034336");
         expect(buffer.byteLength).equals(0);
     });
 

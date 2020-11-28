@@ -45,7 +45,9 @@ export class ImageScraper {
     async getBookImages(isbn: string) {
         const buffer = await this.getBookImageBuffer(isbn);
         let status = false;
-        if (buffer && buffer.byteLength > 10000) { // assuming image size of min 10-20Kb
+        if (buffer && buffer.byteLength > 4000) { // assuming image size of min 4kb Min
+            //await fs.writeFileSync(`./banana-prod/${isbn}.jpg`, buffer,{ flag: 'w+' });
+           // status = true;
             const uploadRes = await this.blobClient.UploadBlob(isbn, buffer);
             if (uploadRes._response.status == 201) {
                 status = true;
@@ -81,3 +83,5 @@ export class ImageScraper {
         return `https://pictures.abebooks.com/isbn/${isbn}-us-300.jpg`;
     }
 }
+
+//9780801034336

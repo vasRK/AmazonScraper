@@ -5,6 +5,10 @@ import { ImageScraper } from './browser-utils';
 import { Repository } from "./repository";
 import { _logger } from './logger'
 
+
+_logger.info('Version: v2');
+console.log('Version: v2');
+
 const scraper = new ImageScraper();
 async function main() {
     const sbClient = ServiceBusClient.createFromConnectionString(AZURE_SERVICEBUS_CONNECTION_STRING);
